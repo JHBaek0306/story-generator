@@ -13,26 +13,40 @@ const App = () => {
   const [story, setStory] = useState("");
   const [imageCaption, setImageCaption] = useState("");
   const [reflection, setReflection] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleGenerate = async () => {
     if (image) {
+      setLoading(true);
       const result = await generateStory(image, genre, prompt);
       setStory(result.story);
       setImageCaption(result.image_caption);
       setReflection(result.reflection);
+      setLoading(false);
     }
   };
 
   return (
-    <div>
-      <div className="one">
-        <h1>Story Creater</h1>
+    <div className="app-container">
+      <header className="header">
+        <h1>AI Story Generator</h1>
+      </header>
+
+      <div className="input-section">
+        <div className="left-panel">
+          <ImageUploader setImage={setImage} />
+        </div>
+        <div className="right-panel">
+          <GenreSelector genre={genre} setGenre={setGenre} />
+          <StoryPromptInput prompt={prompt} setPrompt={setPrompt} onGenerate={handleGenerate} loading={loading} />
+        </div>
       </div>
-      <ImageUploader setImage={setImage} />
-      <div className="selectGenre">Select Genre</div>
-      <GenreSelector genre={genre} setGenre={setGenre} />
-      <StoryPromptInput prompt={prompt} setPrompt={setPrompt} onGenerate={handleGenerate}/>
-      <StoryDisplay story={story} imageCaption={imageCaption} reflection={reflection} />
+
+      {(story || imageCaption || reflection) &&
+        <div className="story-display">
+          <StoryDisplay story={story} imageCaption={imageCaption} reflection={reflection} />
+        </div>
+      }
     </div>
   );
 };

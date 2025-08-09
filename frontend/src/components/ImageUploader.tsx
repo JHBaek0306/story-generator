@@ -1,37 +1,36 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from 'react';
+import { useDropzone } from 'react-dropzone';
+import './ImageUploader.css';
 
 interface ImageUploaderProps {
-    setImage : (file: File) => void;
+  setImage: (file: File) => void;
 }
 
-export const ImageUploader = ({ setImage }: ImageUploaderProps) => {
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+export const ImageUploader: React.FC<ImageUploaderProps> = ({ setImage }) => {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-        setImage(file);
-        const url = URL.createObjectURL(file);
-        setPreviewUrl(url);
-        }
-    };
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+    if (file) {
+      setImage(file);
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    }
+  }, [setImage]);
 
-    useEffect(() => {
-        return () => {
-        if (previewUrl) URL.revokeObjectURL(previewUrl);
-        };
-    }, [previewUrl]);
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: {'image/*':[]} });
 
-    return (
-        <div className="previewImg">
-            <div className="previewBox">
-                {previewUrl ? (
-                <img src={previewUrl} alt="Preview" className="img" />
-                ) : (
-                <div className="placeholder">Upload a image</div>
-                )}
-            </div>
-        <input type="file" accept="image/*" onChange={handleChange} className="fileInput" />
+  return (
+    <div {...getRootProps()} className={`image-uploader ${isDragActive ? 'active' : ''}`}>
+      <input {...getInputProps()} />
+      {previewUrl ? (
+        <img src={previewUrl} alt="Preview" className="image-preview" />
+      ) : (
+        <div className="placeholder">
+          <p>Drag & drop an image here, or click to select one</p>
+          <em>(Images up to 10MB)</em>
         </div>
-    );
+      )}
+    </div>
+  );
 };

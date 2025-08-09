@@ -1,6 +1,10 @@
 import base64
-from typing import TypedDict, Optional
+import io
+from typing import Optional
 from dotenv import load_dotenv
+from pydantic import BaseModel
+from PIL import Image
+
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
 from langchain_core.runnables import RunnableConfig
@@ -8,91 +12,85 @@ from langgraph.graph import StateGraph, END
 
 load_dotenv()
 
-# State
-class State(TypedDict):
-    image_caption: str
-    story: str
-    iteration: int
+MAX_ITERATIONS = 1
+MAX_IMAGE_SIZE = (800, 800)  # Base64 전송 전에 이미지 리사이즈
+JPEG_QUALITY = 85
 
+class State(BaseModel):
+    image_path: str
+    user_input: str
+    genre: str
+    image_caption: str = ""
+    story: str = ""
+    reflection: str = ""
+    iteration: int = 0
 
 # LLM
-caption_llm = ChatOpenAI(model="gpt-5-mini", temperature=1)
-story_llm = ChatOpenAI(model="gpt-5-mini", temperature=1)
+caption_llm = ChatOpenAI(model="gpt-5-mini", max_tokens=1024)
+story_llm = ChatOpenAI(model="gpt-5-mini", temperature=1, max_tokens=1024)
 
-
-# image base64 encoding
+# Image to Base64 Encoding
 def encode_image(image_path: str) -> str:
-    with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode("utf-8")
+    img = Image.open(image_path)
+    img.thumbnail(MAX_IMAGE_SIZE)
+    buffer = io.BytesIO()
+    img.save(buffer, format="JPEG", quality=JPEG_QUALITY)
+    return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
 
-# Image description Node
+# Image Caption Node
 def caption_node(state: State, config: Optional[RunnableConfig] = None) -> State:
-    base64_image = encode_image("./picture.jpg")
+    base64_image = encode_image(state.image_path)
 
     message = HumanMessage(
         content=[
-            {"type": "text", "text": "Describe this image in detail, in 250 words."},
+            {"type": "text", "text": "Describe this image in detail, in about 250 words."},
             {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
         ]
     )
 
-    response = caption_llm.invoke([message])
+    response = caption_llm.invoke([message], config=config)
 
-    # content response to string
-    raw_content = response.content
-    if isinstance(raw_content, list):
-        caption = " ".join(
-            part.get("text", "") for part in raw_content
-            if isinstance(part, dict) and part.get("type") == "text"
-        )
-    else:
-        caption = str(raw_content)
-
-    return {
-        "image_caption": caption,
-        "story": "",
-        "iteration": 0
-    }
+    return state.copy(update={
+        "image_caption": response.content
+    })
 
 
-# Story creation Node
+# Story Creation Node
 def story_node(state: State, config: Optional[RunnableConfig] = None) -> State:
     prompt = (
-        f"You are an expert writer.\n"
-        f"1. Provide a detailed ~250 word story based on the following image description:\n"
-        f"{state['image_caption']}\n"
+        f"You are an expert {state.genre} writer.\n"
+        f"1. Provide a detailed ~250 word story based on the following image description and user input:\n"
+        f"Image Description: {state.image_caption}\n"
+        f"User Input: {state.user_input}\n"
     )
 
-    response = story_llm.invoke([HumanMessage(content=prompt)])
+    response = story_llm.invoke([HumanMessage(content=prompt)], config=config)
 
-    return {
-        **state,
-        "story": str(response.content)
-    }
+    return state.copy(update={
+        "story": response.content
+    })
 
 
 # Reflection Node
 def reflection_node(state: State, config: Optional[RunnableConfig] = None) -> State:
     prompt = (
-        f"You wrote the following story:\n{state['story']}\n\n"
+        f"You are an expert {state.genre} writer.\n"
+        f"You wrote the following story:\n{state.story}\n\n"
         f"Critique it severely to maximize improvement, then rewrite a better version."
     )
 
-    response = story_llm.invoke([HumanMessage(content=prompt)])
+    response = story_llm.invoke([HumanMessage(content=prompt)], config=config)
 
-    return {
-        **state,
-        "story": str(response.content),
-        "iteration": state["iteration"] + 1
-    }
+    return state.copy(update={
+        "reflection": response.content,
+        "iteration": state.iteration + 1
+    })
 
 
-# conditional edge function
+# Conditional Edge
 def should_continue(state: State) -> str:
-    if state["iteration"] < 2:
-        return "reflect"
-    return END
+    return "reflect" if state.iteration < MAX_ITERATIONS else END
 
 
 # LangGraph 
@@ -105,11 +103,17 @@ graph.add_node("reflect", reflection_node)
 graph.set_entry_point("caption")
 graph.add_edge("caption", "story")
 graph.add_edge("story", "reflect")
-graph.add_conditional_edges("reflect", should_continue, { "reflect": "reflect", END: END })
+graph.add_conditional_edges("reflect", should_continue, {"reflect": "reflect", END: END})
 
-app = graph.compile()
+app = graph.compile(debug=True)
 
-if __name__ == "__main__":
-    final_state = app.invoke(State(image_caption="", story="", iteration=0))
-    print("\n=== Final Story ===\n")
-    print(final_state["story"])
+
+# Execution Funciton
+def run_image_story_graph(image_path: str, user_input: str, genre: str):
+    initial_state = State(
+        image_path=image_path,
+        user_input=user_input,
+        genre=genre
+    )
+    final_state = app.invoke(initial_state)
+    return final_state

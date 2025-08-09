@@ -1,0 +1,30 @@
+.story-display-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.story-section {
+  background-color: #f8fafc;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.story-section h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.story-section p {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #475569;
+  white-space: pre-wrap;
+  margin: 0;
+}

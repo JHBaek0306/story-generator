@@ -1,58 +1,22 @@
 
-:root {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  line-height: 1.5;
-  font-weight: 400;
-
-  color: #31333F;
-  background-color: #FFFFFF;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-  background-color: #F0F2F6;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #eef2f7;
+  color: #334155;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 #root {
   width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   padding: 2rem;
-}
-
-h1 {
-  font-size: 2.5rem;
-  font-weight: 600;
-  color: #0E1117;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #DCDCDC;
-}
-
-button {
-  border-radius: 0.5rem;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #FF4B4B;
-  color: white;
-  cursor: pointer;
-  transition: background-color 0.25s;
-}
-
-button:hover {
-  background-color: #FF6B6B;
-}
-
-button:disabled {
-  background-color: #A0A0A0;
-  cursor: not-allowed;
 }

@@ -1,18 +1,33 @@
-interface StoryProps {
-    story : string;
-    imageCaption: string;
-    reflection: string;
+import React from 'react';
+import './StoryDisplay.css';
+
+interface StoryDisplayProps {
+  story: string;
+  imageCaption: string;
+  reflection: string;
 }
 
-export const StoryDisplay = ({ story, imageCaption, reflection }:StoryProps) => (
-    <div className="storyDisplayWrapper">
-        <div className="storyDisplayBox">
-        <h3>Generated Story</h3>
-        <p>{story}</p>
-        <h3>Image Caption</h3>
-        <p>{imageCaption}</p>
-        <h3>Reflection</h3>
-        <p>{reflection}</p>
+export const StoryDisplay: React.FC<StoryDisplayProps> = ({ story, imageCaption, reflection }) => {
+  return (
+    <div className="story-display-container">
+      {imageCaption && (
+        <div className="story-section">
+          <h2>Image Caption</h2>
+          <p>{imageCaption}</p>
         </div>
+      )}
+      {story && (
+        <div className="story-section">
+          <h2>Generated Story</h2>
+          <p>{story}</p>
+        </div>
+      )}
+      {reflection && (
+        <div className="story-section">
+          <h2>Reflection</h2>
+          <p>{reflection}</p>
+        </div>
+      )}
     </div>
-);
+  );
+};

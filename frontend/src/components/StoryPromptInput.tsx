@@ -1,20 +1,32 @@
-type Props = {
-    prompt: string;
-    setPrompt: (p: string) => void;
-    onGenerate: () => void;
-};
+import React from 'react';
+import './StoryPromptInput.css';
 
-export const StoryPromptInput = ({ prompt, setPrompt, onGenerate }: Props) => (
-    <div className="storyPromptWrapper">
-        <textarea
+interface StoryPromptInputProps {
+  prompt: string;
+  setPrompt: (prompt: string) => void;
+  onGenerate: () => void;
+  loading: boolean;
+}
+
+export const StoryPromptInput: React.FC<StoryPromptInputProps> = ({ prompt, setPrompt, onGenerate, loading }) => {
+  return (
+    <div className="story-prompt">
+      <label htmlFor="prompt-textarea">Your creative prompt:</label>
+      <textarea
+        id="prompt-textarea"
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
-        placeholder="Please enter additional information..."
-        className="storyPromptInput"
-        rows={3}
-        />
-        <button className="generateButton" onClick={onGenerate}>
-        Generate Story
-        </button>
+        placeholder="e.g., a hidden treasure, a bright personality...."
+        className="prompt-textarea"
+        rows={4}
+      />
+      <button
+        onClick={onGenerate}
+        className="generate-button"
+        disabled={loading}
+      >
+        {loading ? 'Generating...' : 'Generate Story'}
+      </button>
     </div>
-);
+  );
+};

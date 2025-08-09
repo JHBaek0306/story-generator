@@ -1,0 +1,54 @@
+.story-prompt {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.story-prompt label {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.prompt-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background-color: #ffffff;
+  resize: vertical;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.prompt-textarea:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.generate-button {
+  padding: 0.8rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #6366f1;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  align-self: flex-start;
+}
+
+.generate-button:hover {
+  background-color: #4f46e5;
+}
+
+.generate-button:active {
+  transform: scale(0.98);
+}
+
+.generate-button:disabled {
+  background-color: #a5b4fc;
+  cursor: not-allowed;
+}
